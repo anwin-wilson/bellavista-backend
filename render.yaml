@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: bellavista-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn bellavista_backend.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "True"
