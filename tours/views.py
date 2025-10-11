@@ -24,13 +24,14 @@ class TourBookingCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             booking = serializer.save()
             
-            # Send confirmation email
-            self.send_confirmation_email(booking)
+            # Try to send confirmation email
+            email_sent = self.send_confirmation_email(booking)
             
             return Response({
                 'success': True,
                 'message': 'Tour booking submitted successfully!',
-                'booking_id': booking.id
+                'booking_id': booking.id,
+                'email_sent': email_sent
             }, status=status.HTTP_201_CREATED)
         
         return Response({
@@ -59,7 +60,7 @@ Booking Details:
 - Date: {booking.preferred_date.strftime('%B %d, %Y')}
 - Time: {booking.preferred_time.strftime('%I:%M %p')}
 - Phone: {booking.phone_number}
-- Notes: {booking.notes or 'None'}
+- Special Requirements: {booking.special_requirements or 'None'}
 
 We will contact you within 24 hours to confirm your tour details.
 
@@ -72,10 +73,12 @@ Bellavista Care Homes Team
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 [booking.email],
-                fail_silently=True,
+                fail_silently=False,
             )
+            return True
         except Exception as e:
             print(f'Email sending failed: {e}')
+            return False
 
 class TourBookingListView(generics.ListAPIView):
     """API view to list all tour bookings (for admin)"""
