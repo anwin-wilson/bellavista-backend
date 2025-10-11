@@ -60,7 +60,7 @@ Booking Details:
 - Date: {booking.preferred_date.strftime('%B %d, %Y')}
 - Time: {booking.preferred_time.strftime('%I:%M %p')}
 - Phone: {booking.phone_number}
-- Special Requirements: {booking.special_requirements or 'None'}
+- Special Requirements: {booking.notes or 'None'}
 
 We will contact you within 24 hours to confirm your tour details.
 
