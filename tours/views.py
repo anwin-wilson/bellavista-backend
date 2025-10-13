@@ -3,6 +3,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import TourBooking
 from .serializers import TourBookingCreateSerializer, TourBookingListSerializer
+import requests
+import math
+from .constants import HOME_LOCATIONS, AVERAGE_SPEED_KMH
 
 class TourBookingCreateView(generics.CreateAPIView):
     """API view to create a new tour booking"""
@@ -230,3 +233,122 @@ def test_connection(request):
         'message': 'Backend is working!',
         'total_bookings': TourBooking.objects.count()
     })
+
+@api_view(['GET'])
+def find_nearest_home(request):
+    """Find the nearest Bellavista home to a given location"""
+    user_location = request.GET.get('location', '').strip()
+    user_lat_param = request.GET.get('lat')
+    user_lon_param = request.GET.get('lon')
+
+    if user_lat_param and user_lon_param:
+        # Use provided coordinates directly
+        try:
+            user_lat = float(user_lat_param)
+            user_lon = float(user_lon_param)
+        except ValueError:
+            return Response({
+                'error': 'Invalid latitude or longitude values'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    elif user_location:
+        # Geocode user location using Nominatim (OpenStreetMap)
+        try:
+            nominatim_url = 'https://nominatim.openstreetmap.org/search'
+            params = {
+                'q': user_location,
+                'format': 'json',
+                'limit': 1,
+                'countrycodes': 'gb'  # Limit to UK
+            }
+            headers = {
+                'User-Agent': 'BellavistaCareHomes/1.0'
+            }
+
+            response = requests.get(nominatim_url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()
+
+            data = response.json()
+            if not data:
+                return Response({
+                    'error': 'Location not found. Please try a different address or postcode.'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            user_lat = float(data[0]['lat'])
+            user_lon = float(data[0]['lon'])
+        except requests.RequestException as e:
+            return Response({
+                'error': f'Geocoding service error: {str(e)}'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    # Calculate distances to all homes
+    nearest_home = None
+    min_distance = float('inf')
+
+    for home_key, home_data in HOME_LOCATIONS.items():
+        home_lat, home_lon = home_data['coordinates']
+        distance = haversine_distance(user_lat, user_lon, home_lat, home_lon)
+
+        if distance < min_distance:
+            min_distance = distance
+            nearest_home = {
+                'key': home_key,
+                'name': home_data['name'],
+                'address': home_data['address'],
+                'phone': home_data['phone'],
+                'distance': round(distance, 1),
+                'coordinates': home_data['coordinates']
+            }
+
+    if not nearest_home:
+        return Response({
+            'error': 'No homes found'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Estimate driving time (rough calculation)
+    duration_hours = min_distance / AVERAGE_SPEED_KMH
+    duration_minutes = int(duration_hours * 60)
+
+    # Format duration
+    if duration_minutes < 60:
+        duration_str = f"{duration_minutes} minutes"
+    else:
+        hours = duration_minutes // 60
+        minutes = duration_minutes % 60
+        duration_str = f"{hours} hour{'s' if hours > 1 else ''} {minutes} minutes"
+
+    # Create Google Maps navigation URL
+    if user_lat_param and user_lon_param:
+        # For coordinates, use them directly as origin
+        maps_url = f"https://www.google.com/maps/dir/?api=1&origin={user_lat},{user_lon}&destination={nearest_home['coordinates'][0]},{nearest_home['coordinates'][1]}"
+    else:
+        # For text location, use the location string
+        maps_url = f"https://www.google.com/maps/dir/?api=1&origin={user_location.replace(' ', '+')}&destination={nearest_home['coordinates'][0]},{nearest_home['coordinates'][1]}"
+
+    return Response({
+        'nearest_home': nearest_home['name'],
+        'address': nearest_home['address'],
+        'phone': nearest_home['phone'],
+        'distance': f"{nearest_home['distance']} miles",
+        'duration': duration_str,
+        'maps_url': maps_url,
+        'coordinates': nearest_home['coordinates']
+    })
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate the great circle distance between two points in miles"""
+    # Convert latitude and longitude from degrees to radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    # Haversine formula
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+    a = math.sin(dlat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon/2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+    # Earth's radius in miles
+    radius_miles = 3959
+    distance = radius_miles * c
+
+    return distance
