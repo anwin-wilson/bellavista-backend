@@ -1,30 +1,61 @@
+# API Views for Tour Booking System
+# This file contains all the API endpoints for the tour booking functionality
+
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import TourBooking
-from .serializers import TourBookingCreateSerializer, TourBookingListSerializer
+from django.core.mail import send_mail
+from django.conf import settings
 import requests
 import math
+
+from .models import TourBooking
+from .serializers import TourBookingCreateSerializer, TourBookingListSerializer
 from .constants import HOME_LOCATIONS, AVERAGE_SPEED_KMH
 
+# =============================================================================
+# MAIN BOOKING VIEWS
+# =============================================================================
+
 class TourBookingCreateView(generics.CreateAPIView):
-    """API view to create a new tour booking"""
+    """
+    API endpoint for creating new tour bookings.
+    
+    Handles both GET (info about endpoint) and POST (create booking) requests.
+    Automatically sends confirmation emails when bookings are created.
+    """
     
     queryset = TourBooking.objects.all()
     serializer_class = TourBookingCreateSerializer
     
     def get(self, request, *args, **kwargs):
-        """Handle GET requests - return form schema or empty response"""
+        """
+        Handle GET requests - return information about this endpoint.
+        Useful for frontend developers to understand the API.
+        """
         return Response({
             'message': 'Tour booking endpoint ready',
             'methods': ['POST'],
-            'required_fields': ['first_name', 'last_name', 'email', 'phone_number', 'preferred_home', 'preferred_date', 'preferred_time']
+            'required_fields': [
+                'first_name', 'last_name', 'email', 'phone_number', 
+                'preferred_home', 'preferred_date', 'preferred_time'
+            ]
         })
     
     def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests - create a new tour booking.
+        
+        Process:
+        1. Validate the submitted data
+        2. Create the booking if valid
+        3. Send confirmation email
+        4. Return success/error response
+        """
         serializer = self.get_serializer(data=request.data)
         
         if serializer.is_valid():
+            # Create the booking
             booking = serializer.save()
             
             # Try to send confirmation email
@@ -37,6 +68,7 @@ class TourBookingCreateView(generics.CreateAPIView):
                 'email_sent': email_sent
             }, status=status.HTTP_201_CREATED)
         
+        # Return validation errors if data is invalid
         return Response({
             'success': False,
             'message': 'Please check the form for errors.',
@@ -44,13 +76,19 @@ class TourBookingCreateView(generics.CreateAPIView):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     def send_confirmation_email(self, booking):
-        """Send confirmation email to customer"""
-        from django.core.mail import send_mail
-        from django.conf import settings
+        """
+        Send confirmation email to the customer.
         
+        Args:
+            booking (TourBooking): The booking instance to send email for
+            
+        Returns:
+            bool: True if email sent successfully, False otherwise
+        """
         try:
             subject = f'Tour Booking Confirmation - #{booking.id}'
             
+            # Create email message with booking details
             message = f"""
 Dear {booking.first_name},
 
@@ -84,49 +122,82 @@ Bellavista Care Homes Team
             return False
 
 class TourBookingListView(generics.ListAPIView):
-    """API view to list all tour bookings (for admin)"""
+    """
+    API endpoint to list all tour bookings.
+    
+    This is typically used by admin interfaces to view all bookings.
+    Returns a list of all bookings with computed fields like full_name.
+    """
     
     queryset = TourBooking.objects.all()
     serializer_class = TourBookingListSerializer
     
-
+# =============================================================================
+# UTILITY API ENDPOINTS
+# =============================================================================
 
 @api_view(['GET'])
 def available_slots(request):
-    """API endpoint to get available time slots for a specific date and home"""
+    """
+    Get available time slots for a specific date and care home.
+    
+    Query Parameters:
+        date (str): Date in YYYY-MM-DD format
+        home (str): Care home code (e.g., 'cardiff', 'barry')
+        
+    Returns:
+        JSON with available time slots for the specified date and home
+    """
     date = request.GET.get('date')
     home = request.GET.get('home')
     
+    # Validate required parameters
     if not date or not home:
         return Response({
             'error': 'Date and home parameters are required'
         }, status=status.HTTP_400_BAD_REQUEST)
     
+    # Get existing bookings for this date and home
     existing_bookings = TourBooking.objects.filter(
         preferred_date=date,
         preferred_home=home
     ).values_list('preferred_time', flat=True)
 
+    # Define all possible time slots
     all_slots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
+    
+    # Convert booked times to string format
     booked_slots = [time.strftime('%H:%M') for time in existing_bookings]
-    available_slots = [
+    
+    # Find available slots
+    available_slots_list = [
         slot for slot in all_slots
         if slot not in booked_slots
     ]
     
     return Response({
-        'available_slots': available_slots,
+        'available_slots': available_slots_list,
         'date': date,
         'home': home
     })
 
 @api_view(['GET'])
 def booking_stats(request):
-    """API endpoint to get booking statistics"""
+    """
+    Get booking statistics for admin dashboard.
+    
+    Returns:
+        JSON with various booking statistics including:
+        - Total bookings count
+        - Bookings by status
+        - Bookings by care home
+    """
+    # Count bookings by status
     total_bookings = TourBooking.objects.count()
     confirmed_bookings = TourBooking.objects.filter(status='visited').count()
     pending_bookings = TourBooking.objects.filter(status='pending').count()
     
+    # Count bookings by care home
     homes_stats = {}
     for home_code, home_name in TourBooking.HOME_CHOICES:
         count = TourBooking.objects.filter(preferred_home=home_code).count()
@@ -141,14 +212,29 @@ def booking_stats(request):
 
 @api_view(['PATCH'])
 def update_tour_status(request, booking_id):
-    """Update tour booking status"""
+    """
+    Update the status of a tour booking.
+    
+    Args:
+        booking_id (int): ID of the booking to update
+        
+    Body Parameters:
+        status (str): New status ('visited', 'not_visited', 'pending')
+        
+    Returns:
+        JSON with success/error message
+    """
     try:
+        # Find the booking
         booking = TourBooking.objects.get(id=booking_id)
         new_status = request.data.get('status')
 
-        if new_status in ['visited', 'not_visited', 'pending']:
+        # Validate the new status
+        valid_statuses = ['visited', 'not_visited', 'pending']
+        if new_status in valid_statuses:
             booking.status = new_status
             booking.save()
+            
             return Response({
                 'success': True,
                 'message': f'Status updated to {new_status}',
@@ -158,7 +244,7 @@ def update_tour_status(request, booking_id):
         else:
             return Response({
                 'success': False,
-                'message': 'Invalid status'
+                'message': f'Invalid status. Must be one of: {valid_statuses}'
             }, status=status.HTTP_400_BAD_REQUEST)
 
     except TourBooking.DoesNotExist:
@@ -167,23 +253,36 @@ def update_tour_status(request, booking_id):
             'message': 'Booking not found'
         }, status=status.HTTP_404_NOT_FOUND)
 
+# =============================================================================
+# ADMIN AND EXPORT ENDPOINTS
+# =============================================================================
+
 @api_view(['GET'])
 def export_tours(request):
-    """Export tour bookings to Excel"""
+    """
+    Export tour bookings to Excel file.
+    
+    Query Parameters:
+        status (str): Filter by status ('all', 'pending', 'visited', 'not_visited')
+        
+    Returns:
+        Excel file download or error message
+    """
     try:
         import pandas as pd
         from django.http import HttpResponse
         import io
         
-        status = request.GET.get('status', 'all')
+        # Get status filter from query parameters
+        status_filter = request.GET.get('status', 'all')
         
         # Filter bookings based on status
-        if status == 'all':
+        if status_filter == 'all':
             bookings = TourBooking.objects.all()
         else:
-            bookings = TourBooking.objects.filter(status=status)
+            bookings = TourBooking.objects.filter(status=status_filter)
         
-        # Convert to DataFrame
+        # Convert bookings to list of dictionaries
         data = []
         for booking in bookings:
             data.append({
@@ -200,20 +299,21 @@ def export_tours(request):
                 'Created': booking.created_at.strftime('%Y-%m-%d %H:%M')
             })
         
+        # Create DataFrame and Excel file
         df = pd.DataFrame(data)
         
-        # Create Excel file
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='Tour Bookings', index=False)
         
         output.seek(0)
         
+        # Return Excel file as download
         response = HttpResponse(
             output.getvalue(),
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = f'attachment; filename="tour_bookings_{status}.xlsx"'
+        response['Content-Disposition'] = f'attachment; filename="tour_bookings_{status_filter}.xlsx"'
         
         return response
         
@@ -228,28 +328,49 @@ def export_tours(request):
 
 @api_view(['GET'])
 def test_connection(request):
-    """Test endpoint to verify frontend-backend connection"""
+    """
+    Test endpoint to verify frontend-backend connection.
+    
+    This is useful for debugging and ensuring the API is working.
+    
+    Returns:
+        JSON with connection status and basic stats
+    """
     return Response({
         'status': 'connected',
         'message': 'Backend is working!',
         'total_bookings': TourBooking.objects.count()
     })
 
+# =============================================================================
+# LOCATION-BASED SERVICES
+# =============================================================================
+
 @api_view(['GET'])
 def find_nearest_home(request):
-    """Find the nearest Bellavista home to a given location"""
+    """
+    Find the nearest Bellavista care home to a given location.
+    
+    Query Parameters:
+        location (str): Address or postcode to search from
+        lat (float): Latitude coordinate (alternative to location)
+        lon (float): Longitude coordinate (alternative to location)
+        
+    Returns:
+        JSON with nearest home details, distance, and navigation URL
+    """
     user_location = request.GET.get('location', '').strip()
     user_lat_param = request.GET.get('lat')
     user_lon_param = request.GET.get('lon')
 
-    # Check if required parameters are provided
+    # Validate input parameters
     if not user_location and not (user_lat_param and user_lon_param):
         return Response({
             'error': 'Location parameter or both lat and lon parameters are required'
         }, status=status.HTTP_400_BAD_REQUEST)
 
+    # Handle coordinate input
     if user_lat_param and user_lon_param:
-        # Use provided coordinates directly
         try:
             user_lat = float(user_lat_param)
             user_lon = float(user_lon_param)
@@ -257,8 +378,9 @@ def find_nearest_home(request):
             return Response({
                 'error': 'Invalid latitude or longitude values'
             }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Handle location string input - geocode using OpenStreetMap
     elif user_location:
-        # Geocode user location using Nominatim (OpenStreetMap)
         try:
             nominatim_url = 'https://nominatim.openstreetmap.org/search'
             params = {
@@ -282,11 +404,13 @@ def find_nearest_home(request):
 
             user_lat = float(data[0]['lat'])
             user_lon = float(data[0]['lon'])
+            
         except requests.RequestException as e:
             return Response({
                 'error': f'Geocoding service error: {str(e)}'
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    # Calculate distances to all homes
+    
+    # Calculate distances to all care homes
     nearest_home = None
     min_distance = float('inf')
 
@@ -310,11 +434,11 @@ def find_nearest_home(request):
             'error': 'No homes found'
         }, status=status.HTTP_404_NOT_FOUND)
 
-    # Estimate driving time (rough calculation)
+    # Calculate estimated driving time
     duration_hours = min_distance / AVERAGE_SPEED_KMH
     duration_minutes = int(duration_hours * 60)
 
-    # Format duration
+    # Format duration string
     if duration_minutes < 60:
         duration_str = f"{duration_minutes} minutes"
     else:
@@ -324,10 +448,8 @@ def find_nearest_home(request):
 
     # Create Google Maps navigation URL
     if user_lat_param and user_lon_param:
-        # For coordinates, use them directly as origin
         maps_url = f"https://www.google.com/maps/dir/?api=1&origin={user_lat},{user_lon}&destination={nearest_home['coordinates'][0]},{nearest_home['coordinates'][1]}"
     else:
-        # For text location, use the location string
         maps_url = f"https://www.google.com/maps/dir/?api=1&origin={user_location.replace(' ', '+')}&destination={nearest_home['coordinates'][0]},{nearest_home['coordinates'][1]}"
 
     return Response({
@@ -340,8 +462,24 @@ def find_nearest_home(request):
         'coordinates': nearest_home['coordinates']
     })
 
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
 def haversine_distance(lat1, lon1, lat2, lon2):
-    """Calculate the great circle distance between two points in miles"""
+    """
+    Calculate the great circle distance between two points on Earth.
+    
+    Uses the Haversine formula to calculate the shortest distance between
+    two points on a sphere (Earth) given their latitude and longitude.
+    
+    Args:
+        lat1, lon1 (float): Latitude and longitude of first point
+        lat2, lon2 (float): Latitude and longitude of second point
+        
+    Returns:
+        float: Distance in miles
+    """
     # Convert latitude and longitude from degrees to radians
     lat1_rad = math.radians(lat1)
     lon1_rad = math.radians(lon1)
