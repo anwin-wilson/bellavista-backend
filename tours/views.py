@@ -63,7 +63,7 @@ Booking Details:
 - Date: {booking.preferred_date.strftime('%B %d, %Y')}
 - Time: {booking.preferred_time.strftime('%I:%M %p')}
 - Phone: {booking.phone_number}
-- Special Requirements: {booking.notes or 'None'}
+- Notes: {booking.notes or 'None'}
 
 We will contact you within 24 hours to confirm your tour details.
 
@@ -240,6 +240,12 @@ def find_nearest_home(request):
     user_location = request.GET.get('location', '').strip()
     user_lat_param = request.GET.get('lat')
     user_lon_param = request.GET.get('lon')
+
+    # Check if required parameters are provided
+    if not user_location and not (user_lat_param and user_lon_param):
+        return Response({
+            'error': 'Location parameter or both lat and lon parameters are required'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     if user_lat_param and user_lon_param:
         # Use provided coordinates directly
