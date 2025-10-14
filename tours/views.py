@@ -123,8 +123,8 @@ def available_slots(request):
 def booking_stats(request):
     """API endpoint to get booking statistics"""
     total_bookings = TourBooking.objects.count()
-    confirmed_bookings = TourBooking.objects.filter(is_confirmed=True).count()
-    pending_bookings = total_bookings - confirmed_bookings
+    confirmed_bookings = TourBooking.objects.filter(status='visited').count()
+    pending_bookings = TourBooking.objects.filter(status='pending').count()
     
     homes_stats = {}
     for home_code, home_name in TourBooking.HOME_CHOICES:
