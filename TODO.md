@@ -1,19 +1,45 @@
-# Railway Deployment Fixes
+# Code Cleanup TODO
 
-## Tasks
-- [x] Update railway.json with proper port binding and production environment variables
-- [x] Add SPA fallback URL pattern in bellavista_backend/urls.py for non-API routes
-- [x] Create basic index.html in staticfiles for frontend SPA
-- [x] Update TEMPLATES DIRS to include staticfiles for template loading
-- [x] Production testing completed - API endpoints still returning HTML instead of JSON
+## Folder: bellavista_backend/
+- [x] Clean __init__.py
+- [ ] Clean settings.py
+- [ ] Clean urls.py
+- [ ] Clean wsgi.py
 
-## Status
-- Stats endpoint already fixed (uses 'visited' status)
-- DEBUG already defaults to False in settings.py
-- Railway deployment is still serving React frontend for all routes including /api/*
-- The fixes were not applied or Railway hasn't redeployed yet
+## Folder: tours/
+- [ ] Clean __init__.py
+- [ ] Clean admin.py
+- [ ] Clean constants.py
+- [ ] Clean models.py
+- [ ] Clean serializers.py
+- [ ] Clean urls.py
+- [ ] Clean views.py
+- [ ] Clean management/__init__.py
+- [ ] Clean management/commands/__init__.py
+- [ ] Clean migrations/__init__.py
+- [ ] Clean migrations/0001_initial.py
+- [ ] Clean migrations/0002_update_tour_booking_fields.py
 
-## Test Results
-- All API endpoints (/api/tours/test/, /api/tours/stats/, etc.) return React HTML instead of JSON
-- Root URL also returns React HTML
-- Indicates Railway is still serving static files instead of Django app
+## Folder: tests/
+- [ ] Clean __init__.py
+- [ ] Clean test_api.py
+- [ ] Clean test_emails.py
+- [ ] Clean test_models.py
+- [ ] Clean test_serializers.py
+- [ ] Clean test_utils.py
+- [ ] Clean test_views.py
+
+## Folder: staticfiles/
+- [ ] Clean index.html
+
+## Root Files
+- [ ] Clean .gitignore
+- [ ] Clean build.sh
+- [ ] Clean manage.py
+- [ ] Clean Procfile
+- [ ] Clean railway.json
+- [ ] Clean README.md
+- [ ] Clean render.yaml
+- [ ] Clean requirements.txt
+- [ ] Clean runtime.txt
+- [ ] Clean TODO.md (this file)

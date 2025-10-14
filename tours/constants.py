@@ -22,7 +22,7 @@ HOME_LOCATIONS = {
         'coordinates': (51.4850, -3.1750),  # Approximate coordinates near Cardiff
         'phone': '029 2100 0000'
     },
-    'college_fields': {
+    'college-fields': {
         'name': 'College Fields',
         'address': 'College Fields, Wales, UK',
         'coordinates': (51.4900, -3.1800),  # Approximate coordinates near Cardiff

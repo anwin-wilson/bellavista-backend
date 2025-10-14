@@ -18,7 +18,7 @@ class EmailTest(TestCase):
         booking_data = {
             "first_name": "Test User",
             "last_name": "Smith",
-            "email": "test@example.com",
+            "email": "anwinws@gmail.com",
             "phone_number": "+1234567890",
             "preferred_home": "cardiff",
             "preferred_date": self.tomorrow,

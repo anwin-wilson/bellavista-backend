@@ -106,11 +106,12 @@ def available_slots(request):
         preferred_date=date,
         preferred_home=home
     ).values_list('preferred_time', flat=True)
-    
+
     all_slots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
+    booked_slots = [time.strftime('%H:%M') for time in existing_bookings]
     available_slots = [
-        slot for slot in all_slots 
-        if slot not in [str(time) for time in existing_bookings]
+        slot for slot in all_slots
+        if slot not in booked_slots
     ]
     
     return Response({
@@ -143,23 +144,23 @@ def update_tour_status(request, booking_id):
     """Update tour booking status"""
     try:
         booking = TourBooking.objects.get(id=booking_id)
-        status = request.data.get('status')
-        
-        if status in ['visited', 'not_visited', 'pending']:
-            booking.status = status
+        new_status = request.data.get('status')
+
+        if new_status in ['visited', 'not_visited', 'pending']:
+            booking.status = new_status
             booking.save()
             return Response({
                 'success': True,
-                'message': f'Status updated to {status}',
+                'message': f'Status updated to {new_status}',
                 'booking_id': booking_id,
-                'new_status': status
+                'new_status': new_status
             })
         else:
             return Response({
                 'success': False,
                 'message': 'Invalid status'
             }, status=status.HTTP_400_BAD_REQUEST)
-            
+
     except TourBooking.DoesNotExist:
         return Response({
             'success': False,
