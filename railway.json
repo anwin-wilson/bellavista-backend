@@ -20,6 +20,14 @@
     {
       "name": "CORS_ALLOW_ALL_ORIGINS",
       "value": "True"
+    },
+    {
+      "name": "DATABASE_URL",
+      "value": "${{RAILWAY_DATABASE_URL}}"
+    },
+    {
+      "name": "SECRET_KEY",
+      "value": "your-secure-random-secret-key-here-change-in-production"
     }
   ]
 }
