@@ -2,8 +2,8 @@ services:
   - type: web
     name: bellavista-backend
     env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn bellavista_backend.wsgi:application --bind 0.0.0.0:$PORT"
+    buildCommand: "./build.sh"
+    startCommand: "./start.sh"
     envVars:
       - key: SECRET_KEY
         generateValue: true
@@ -13,7 +13,3 @@ services:
         value: "*"
       - key: CORS_ALLOW_ALL_ORIGINS
         value: "True"
-  - type: pserv
-    name: bellavista-postgres
-    env: docker
-    plan: free
