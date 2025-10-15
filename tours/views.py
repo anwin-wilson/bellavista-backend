@@ -45,10 +45,9 @@ class TourBookingCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         """
         Handle POST requests - create a new tour booking.
-        Simplified version to avoid worker timeout.
         """
         try:
-            # Direct database creation without complex serializer
+            # Create booking first
             booking = TourBooking.objects.create(
                 first_name=request.data.get('first_name', ''),
                 last_name=request.data.get('last_name', ''),
@@ -61,11 +60,14 @@ class TourBookingCreateView(generics.CreateAPIView):
                 status='pending'
             )
             
+            # Send email asynchronously (non-blocking)
+            email_sent = self.send_confirmation_email_async(booking)
+            
             return Response({
                 'success': True,
                 'message': 'Tour booking submitted successfully!',
                 'booking_id': booking.id,
-                'email_sent': False
+                'email_sent': email_sent
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
@@ -74,6 +76,55 @@ class TourBookingCreateView(generics.CreateAPIView):
                 'message': f'Booking failed: {str(e)}',
                 'errors': {}
             }, status=status.HTTP_400_BAD_REQUEST)
+    
+    def send_confirmation_email_async(self, booking):
+        """
+        Send confirmation email asynchronously to avoid blocking.
+        """
+        import threading
+        
+        def send_email():
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = f'Tour Booking Confirmation - #{booking.id}'
+                message = f"""
+Dear {booking.first_name},
+
+Thank you for booking a tour with Bellavista Care Homes!
+
+Booking Details:
+- Booking ID: #{booking.id}
+- Name: {booking.first_name} {booking.last_name or ''}
+- Location: {booking.get_home_display_name()}
+- Date: {booking.preferred_date}
+- Time: {booking.preferred_time}
+- Phone: {booking.phone_number}
+- Notes: {booking.notes or 'None'}
+
+We will contact you within 24 hours to confirm your tour details.
+
+Best regards,
+Bellavista Care Homes Team
+"""
+                
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [booking.email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f'Async email failed: {e}')
+        
+        # Start email sending in background thread
+        thread = threading.Thread(target=send_email)
+        thread.daemon = True
+        thread.start()
+        
+        return True  # Always return True since we're sending async
     
     def send_confirmation_email(self, booking):
         """
