@@ -15,6 +15,9 @@
    - `tours/diagnostic_views.py` 
    - `tours/simple_views.py`
    - `debug_date.py`
+   - `render.yaml` (Render config)
+   - `build.sh` (Render script)
+   - `start.sh` (Render script)
 
 2. ✅ Cleaned up imports in `tours/urls.py`
 
@@ -39,3 +42,5 @@ This should resolve the deployment failure emails by:
 - Removing unstable experimental code
 - Simplifying imports
 - Using only proven Django patterns
+- **REMOVING RENDER CONFIG** - Railway deployment only
+- Added .renderignore to prevent Render attempts
