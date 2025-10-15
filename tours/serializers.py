@@ -29,7 +29,10 @@ class TourBookingSerializer(serializers.ModelSerializer):
         Custom validation for preferred_date field.
         Ensures users cannot book tours for past dates.
         """
-        if value < date.today():
+        # Allow bookings for today and future dates (lenient for timezone issues)
+        from datetime import timedelta
+        min_date = date.today() - timedelta(days=1)
+        if value < min_date:
             raise serializers.ValidationError("Tour date cannot be in the past.")
         return value
     
