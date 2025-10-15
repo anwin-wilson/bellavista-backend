@@ -5,6 +5,7 @@ from django.urls import path
 from . import views
 from .simple_views import simple_book_tour
 from .fast_views import fast_bookings_list, fast_book_tour
+from .diagnostic_views import health_check, db_check, minimal_create
 
 # App namespace for URL reversing
 app_name = 'tours'
@@ -45,6 +46,11 @@ urlpatterns = [
     # Fast endpoints
     path('fast-bookings/', fast_bookings_list, name='fast_bookings'),
     path('fast-book/', fast_book_tour, name='fast_book'),
+    
+    # Diagnostic endpoints
+    path('health/', health_check, name='health'),
+    path('db-check/', db_check, name='db_check'),
+    path('minimal-create/', minimal_create, name='minimal_create'),
 
     # =============================================================================
     # LOCATION SERVICES
