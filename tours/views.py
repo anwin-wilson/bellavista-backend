@@ -45,35 +45,35 @@ class TourBookingCreateView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         """
         Handle POST requests - create a new tour booking.
-        
-        Process:
-        1. Validate the submitted data
-        2. Create the booking if valid
-        3. Send confirmation email
-        4. Return success/error response
+        Simplified version to avoid worker timeout.
         """
-        serializer = self.get_serializer(data=request.data)
-        
-        if serializer.is_valid():
-            # Create the booking
-            booking = serializer.save()
-            
-            # Email temporarily disabled to prevent worker timeout
-            email_sent = False
+        try:
+            # Direct database creation without complex serializer
+            booking = TourBooking.objects.create(
+                first_name=request.data.get('first_name', ''),
+                last_name=request.data.get('last_name', ''),
+                email=request.data.get('email', ''),
+                phone_number=request.data.get('phone_number', ''),
+                preferred_home=request.data.get('preferred_home', 'cardiff'),
+                preferred_date=request.data.get('preferred_date'),
+                preferred_time=request.data.get('preferred_time'),
+                notes=request.data.get('notes', ''),
+                status='pending'
+            )
             
             return Response({
                 'success': True,
                 'message': 'Tour booking submitted successfully!',
                 'booking_id': booking.id,
-                'email_sent': email_sent
+                'email_sent': False
             }, status=status.HTTP_201_CREATED)
-        
-        # Return validation errors if data is invalid
-        return Response({
-            'success': False,
-            'message': 'Please check the form for errors.',
-            'errors': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': f'Booking failed: {str(e)}',
+                'errors': {}
+            }, status=status.HTTP_400_BAD_REQUEST)
     
     def send_confirmation_email(self, booking):
         """
