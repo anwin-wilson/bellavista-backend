@@ -1,37 +1,8 @@
-# Python Dependencies for Bellavista Care Homes Backend
-# Install with: pip install -r requirements.txt
-
-# =============================================================================
-# CORE DJANGO FRAMEWORK
-# =============================================================================
-Django==4.2.7                    # Main Django framework
-djangorestframework==3.14.0      # REST API functionality
-django-cors-headers==4.3.1       # Cross-Origin Resource Sharing
-
-# =============================================================================
-# CONFIGURATION AND ENVIRONMENT
-# =============================================================================
-python-decouple==3.8             # Environment variable management
-dj-database-url==2.1.0           # Database URL parsing
-
-# =============================================================================
-# PRODUCTION SERVER AND STATIC FILES
-# =============================================================================
-gunicorn==21.2.0                 # WSGI HTTP Server for production
-whitenoise==6.6.0                # Static file serving
-
-# =============================================================================
-# DATABASE
-# =============================================================================
-psycopg2-binary==2.9.9           # PostgreSQL adapter
-
-# =============================================================================
-# DATA PROCESSING AND EXPORTS
-# =============================================================================
-pandas                           # Data manipulation for Excel exports
-openpyxl                         # Excel file handling
-
-# =============================================================================
-# EXTERNAL SERVICES
-# =============================================================================
-requests                         # HTTP requests for geocoding
+Django==4.2.7
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+python-decouple==3.8
+requests==2.31.0
+whitenoise==6.6.0
