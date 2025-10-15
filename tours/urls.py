@@ -3,6 +3,7 @@
 
 from django.urls import path
 from . import views
+from .simple_views import simple_book_tour
 
 # App namespace for URL reversing
 app_name = 'tours'
@@ -36,6 +37,9 @@ urlpatterns = [
     
     # Test API connection
     path('test/', views.test_connection, name='test_connection'),
+    
+    # Simple booking test
+    path('simple-book/', simple_book_tour, name='simple_book'),
 
     # =============================================================================
     # LOCATION SERVICES
