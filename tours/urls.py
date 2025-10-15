@@ -4,6 +4,7 @@
 from django.urls import path
 from . import views
 from .simple_views import simple_book_tour
+from .fast_views import fast_bookings_list, fast_book_tour
 
 # App namespace for URL reversing
 app_name = 'tours'
@@ -40,6 +41,10 @@ urlpatterns = [
     
     # Simple booking test
     path('simple-book/', simple_book_tour, name='simple_book'),
+    
+    # Fast endpoints
+    path('fast-bookings/', fast_bookings_list, name='fast_bookings'),
+    path('fast-book/', fast_book_tour, name='fast_book'),
 
     # =============================================================================
     # LOCATION SERVICES
