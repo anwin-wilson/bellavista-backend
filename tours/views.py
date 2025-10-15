@@ -58,8 +58,8 @@ class TourBookingCreateView(generics.CreateAPIView):
             # Create the booking
             booking = serializer.save()
             
-            # Try to send confirmation email
-            email_sent = self.send_confirmation_email(booking)
+            # Email temporarily disabled to prevent worker timeout
+            email_sent = False
             
             return Response({
                 'success': True,
