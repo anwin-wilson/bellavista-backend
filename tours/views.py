@@ -60,11 +60,8 @@ class TourBookingCreateView(generics.CreateAPIView):
                 status='pending'
             )
             
-            # Send email asynchronously to prevent timeout
-            try:
-                email_sent = self.send_confirmation_email(booking)
-            except:
-                email_sent = False
+            # Email temporarily disabled for speed
+            email_sent = False
             
             return Response({
                 'success': True,
