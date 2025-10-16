@@ -105,8 +105,8 @@ Booking Details:
 - Booking ID: #{booking.id}
 - Name: {booking.full_name}
 - Location: {booking.get_home_display_name()}
-- Date: {booking.preferred_date.strftime('%B %d, %Y')}
-- Time: {booking.preferred_time.strftime('%I:%M %p')}
+- Date: {booking.preferred_date}
+- Time: {booking.preferred_time}
 - Phone: {booking.phone_number}
 - Notes: {booking.notes or 'None'}
 
