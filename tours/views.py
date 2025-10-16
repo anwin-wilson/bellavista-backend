@@ -121,8 +121,9 @@ Bellavista Care Homes Team
                 message,
                 settings.DEFAULT_FROM_EMAIL,
                 [booking.email],
-                fail_silently=True,
+                fail_silently=False,
             )
+            print(f'Email sent successfully to {booking.email}')
             return True
         except Exception as e:
             print(f'Email sending failed: {e}')
