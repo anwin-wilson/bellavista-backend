@@ -175,7 +175,7 @@ def available_slots(request):
     all_slots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
     
     # Convert booked times to string format
-    booked_slots = [time.strftime('%H:%M') for time in existing_bookings]
+    booked_slots = [str(time) for time in existing_bookings]
     
     # Find available slots
     available_slots_list = [
