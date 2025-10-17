@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.conf import settings
+from .email_service import send_booking_confirmation_email, send_test_email
 import requests
 import math
 
@@ -50,8 +51,8 @@ class TourBookingCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             booking = serializer.save()
             
-            # Send email asynchronously for better performance
-            email_sent = self.send_confirmation_email(booking)
+            # Send email via SendGrid (HTTP-based, works on Render)
+            email_sent = send_booking_confirmation_email(booking)
             
             return Response({
                 'success': True,
@@ -362,26 +363,16 @@ def test_connection(request):
     if request.method == 'POST':
         test_email = request.data.get('email')
         if test_email:
-            try:
-                email_start = time.time()
-                send_mail(
-                    'Bellavista API Test',
-                    'This is a test email from Bellavista Care Homes API.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [test_email],
-                    fail_silently=False,
-                )
-                email_time = time.time() - email_start
-                response_data['email_test'] = {
-                    'success': True,
-                    'time': f'{email_time:.3f}s',
-                    'sent_to': test_email
-                }
-            except Exception as e:
-                response_data['email_test'] = {
-                    'success': False,
-                    'error': str(e)
-                }
+            email_start = time.time()
+            email_result = send_test_email(test_email)
+            email_time = time.time() - email_start
+            
+            response_data['email_test'] = {
+                'success': email_result.get('success', False),
+                'time': f'{email_time:.3f}s',
+                'sent_to': test_email if email_result.get('success') else None,
+                'error': email_result.get('error') if not email_result.get('success') else None
+            }
     
     response_data['performance']['total_response_time'] = f'{time.time() - start_time:.3f}s'
     return Response(response_data)
