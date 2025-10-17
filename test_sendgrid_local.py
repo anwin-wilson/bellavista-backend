@@ -8,7 +8,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bellavista_backend.settings')
-os.environ['SENDGRID_API_KEY'] = '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'
+# Set SendGrid API key from environment or input
+api_key = os.environ.get('SENDGRID_API_KEY') or input('Enter SendGrid API Key: ')
+os.environ['SENDGRID_API_KEY'] = api_key
 
 django.setup()
 
