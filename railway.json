@@ -4,30 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn bellavista_backend.wsgi:application --bind 0.0.0.0:$PORT",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  },
-  "envVars": [
-    {
-      "name": "DEBUG",
-      "value": "False"
-    },
-    {
-      "name": "ALLOWED_HOSTS",
-      "value": "*"
-    },
-    {
-      "name": "CORS_ALLOW_ALL_ORIGINS",
-      "value": "True"
-    },
-    {
-      "name": "DATABASE_URL",
-      "value": "${{RAILWAY_DATABASE_URL}}"
-    },
-    {
-      "name": "SECRET_KEY",
-      "value": "your-secure-random-secret-key-here-change-in-production"
-    }
-  ]
+    "startCommand": "gunicorn bellavista_backend.wsgi:application --bind 0.0.0.0:$PORT",
+    "healthcheckPath": "/api/tours/stats/"
+  }
 }

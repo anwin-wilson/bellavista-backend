@@ -46,22 +46,12 @@ class TourBookingCreateView(generics.CreateAPIView):
         """
         Handle POST requests - create a new tour booking.
         """
-        try:
-            # Create booking first
-            booking = TourBooking.objects.create(
-                first_name=request.data.get('first_name', ''),
-                last_name=request.data.get('last_name', ''),
-                email=request.data.get('email', ''),
-                phone_number=request.data.get('phone_number', ''),
-                preferred_home=request.data.get('preferred_home', 'cardiff'),
-                preferred_date=request.data.get('preferred_date'),
-                preferred_time=request.data.get('preferred_time'),
-                notes=request.data.get('notes', ''),
-                status='pending'
-            )
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            booking = serializer.save()
             
-            # Email temporarily disabled for speed
-            email_sent = False
+            # Send email asynchronously for better performance
+            email_sent = self.send_confirmation_email(booking)
             
             return Response({
                 'success': True,
@@ -69,13 +59,12 @@ class TourBookingCreateView(generics.CreateAPIView):
                 'booking_id': booking.id,
                 'email_sent': email_sent
             }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            return Response({
-                'success': False,
-                'message': f'Booking failed: {str(e)}',
-                'errors': {}
-            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            'success': False,
+            'message': 'Validation failed',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     # Email functionality removed to prevent deployment issues
     
@@ -331,21 +320,71 @@ def export_tours(request):
             'error': f'Export failed: {str(e)}'
         }, status=500)
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def test_connection(request):
     """
-    Test endpoint to verify frontend-backend connection.
+    Test endpoint to verify frontend-backend connection and performance.
     
-    This is useful for debugging and ensuring the API is working.
+    GET: Basic connection test
+    POST: Test email functionality
     
     Returns:
-        JSON with connection status and basic stats
+        JSON with connection status, performance metrics, and test results
     """
-    return Response({
+    import time
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    start_time = time.time()
+    
+    # Basic database query test
+    try:
+        booking_count = TourBooking.objects.count()
+        db_time = time.time() - start_time
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'Database error: {str(e)}'
+        }, status=500)
+    
+    response_data = {
         'status': 'connected',
         'message': 'Backend is working!',
-        'total_bookings': TourBooking.objects.count()
-    })
+        'total_bookings': booking_count,
+        'performance': {
+            'db_query_time': f'{db_time:.3f}s',
+            'total_response_time': f'{time.time() - start_time:.3f}s'
+        },
+        'email_configured': bool(settings.EMAIL_HOST_USER)
+    }
+    
+    # Test email functionality if POST request
+    if request.method == 'POST':
+        test_email = request.data.get('email')
+        if test_email:
+            try:
+                email_start = time.time()
+                send_mail(
+                    'Bellavista API Test',
+                    'This is a test email from Bellavista Care Homes API.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [test_email],
+                    fail_silently=False,
+                )
+                email_time = time.time() - email_start
+                response_data['email_test'] = {
+                    'success': True,
+                    'time': f'{email_time:.3f}s',
+                    'sent_to': test_email
+                }
+            except Exception as e:
+                response_data['email_test'] = {
+                    'success': False,
+                    'error': str(e)
+                }
+    
+    response_data['performance']['total_response_time'] = f'{time.time() - start_time:.3f}s'
+    return Response(response_data)
 
 # =============================================================================
 # LOCATION-BASED SERVICES
