@@ -22,7 +22,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lamb
 # Add production hosts
 if not DEBUG:
     ALLOWED_HOSTS.extend([
-        'bellavista-backend-production.up.railway.app',
+        'your-app.onrender.com',  # Update with your Render URL
     ])
 
 # =============================================================================

@@ -4,7 +4,6 @@
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.core.mail import send_mail
 from django.conf import settings
 from .email_service import send_booking_confirmation_email, send_test_email
 import requests
@@ -101,54 +100,7 @@ class TourBookingCreateView(generics.CreateAPIView):
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
     
-    # Email functionality removed to prevent deployment issues
-    
-    def send_confirmation_email(self, booking):
-        """
-        Send confirmation email to the customer.
-        
-        Args:
-            booking (TourBooking): The booking instance to send email for
-            
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
-        try:
-            subject = f'Tour Booking Confirmation - #{booking.id}'
-            
-            # Create email message with booking details
-            message = f"""
-Dear {booking.first_name},
 
-Thank you for booking a tour with Bellavista Care Homes!
-
-Booking Details:
-- Booking ID: #{booking.id}
-- Name: {booking.full_name}
-- Location: {booking.get_home_display_name()}
-- Date: {booking.preferred_date}
-- Time: {booking.preferred_time}
-- Phone: {booking.phone_number}
-- Notes: {booking.notes or 'None'}
-
-We will contact you within 24 hours to confirm your tour details.
-
-Best regards,
-Bellavista Care Homes Team
-"""
-            
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [booking.email],
-                fail_silently=False,
-            )
-            print(f'Email sent successfully to {booking.email}')
-            return True
-        except Exception as e:
-            print(f'Email sending failed: {e}')
-            return False
 
 class TourBookingListView(generics.ListAPIView):
     """
