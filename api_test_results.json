@@ -1,0 +1,430 @@
+{
+  "connection_test": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "0.913s",
+    "data": {
+      "status": "connected",
+      "message": "Backend is working!",
+      "total_bookings": 21
+    }
+  },
+  "booking_info": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "2.246s",
+    "data": {
+      "message": "Tour booking endpoint ready",
+      "methods": [
+        "POST"
+      ],
+      "required_fields": [
+        "first_name",
+        "last_name",
+        "email",
+        "phone_number",
+        "preferred_home",
+        "preferred_date",
+        "preferred_time"
+      ]
+    }
+  },
+  "create_booking": {
+    "success": false,
+    "error": "Request timeout (30s)"
+  },
+  "list_bookings": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "1.581s",
+    "data": [
+      {
+        "id": 22,
+        "first_name": "Test",
+        "last_name": "User",
+        "full_name": "Test User",
+        "email": "test@example.com",
+        "phone_number": "+44 7700 900123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-10-19",
+        "preferred_time": "10:00:00",
+        "notes": "API test booking",
+        "status": "pending",
+        "created_at": "2025-10-17T20:45:22.164440Z"
+      },
+      {
+        "id": 21,
+        "first_name": "John",
+        "last_name": "Doe",
+        "full_name": "John Doe",
+        "email": "john.doe@example.com",
+        "phone_number": "+44 7700 900123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-10-19",
+        "preferred_time": "10:00:00",
+        "notes": "Test booking from Render deployment",
+        "status": "pending",
+        "created_at": "2025-10-17T20:39:55.698034Z"
+      },
+      {
+        "id": 20,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-10-25",
+        "preferred_time": "15:00:00",
+        "notes": "hhhh",
+        "status": "pending",
+        "created_at": "2025-10-17T20:36:02.153823Z"
+      },
+      {
+        "id": 19,
+        "first_name": "Railway",
+        "last_name": "Test",
+        "full_name": "Railway Test",
+        "email": "anwinws@gmail.com",
+        "phone_number": "07123456789",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-12-25",
+        "preferred_time": "14:00:00",
+        "notes": "Railway email test",
+        "status": "pending",
+        "created_at": "2025-10-17T19:52:06.029194Z"
+      },
+      {
+        "id": 18,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "waverley",
+        "home_display_name": "Waverley",
+        "preferred_date": "2025-10-18",
+        "preferred_time": "14:00:00",
+        "notes": "n",
+        "status": "pending",
+        "created_at": "2025-10-16T00:19:04.649560Z"
+      },
+      {
+        "id": 17,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "waverley",
+        "home_display_name": "Waverley",
+        "preferred_date": "2025-10-18",
+        "preferred_time": "14:00:00",
+        "notes": "",
+        "status": "pending",
+        "created_at": "2025-10-16T00:18:30.450913Z"
+      },
+      {
+        "id": 16,
+        "first_name": "Email",
+        "last_name": "Test",
+        "full_name": "Email Test",
+        "email": "emailtest2@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-12-01",
+        "preferred_time": "15:00:00",
+        "notes": "Testing email functionality",
+        "status": "pending",
+        "created_at": "2025-10-15T23:03:38.698488Z"
+      },
+      {
+        "id": 15,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "waverley",
+        "home_display_name": "Waverley",
+        "preferred_date": "2025-10-18",
+        "preferred_time": "14:00:00",
+        "notes": "",
+        "status": "pending",
+        "created_at": "2025-10-15T23:01:43.535706Z"
+      },
+      {
+        "id": 14,
+        "first_name": "POST",
+        "last_name": "Test",
+        "full_name": "POST Test",
+        "email": "posttest@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-30",
+        "preferred_time": "14:00:00",
+        "notes": "Testing POST functionality",
+        "status": "pending",
+        "created_at": "2025-10-15T23:00:27.630250Z"
+      },
+      {
+        "id": 13,
+        "first_name": "Stable",
+        "last_name": null,
+        "full_name": "Stable",
+        "email": "stable@test.com",
+        "phone_number": "123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-25",
+        "preferred_time": "10:00:00",
+        "notes": null,
+        "status": "pending",
+        "created_at": "2025-10-15T22:55:04.867481Z"
+      },
+      {
+        "id": 12,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "waverley",
+        "home_display_name": "Waverley",
+        "preferred_date": "2025-10-18",
+        "preferred_time": "11:00:00",
+        "notes": "test issue",
+        "status": "pending",
+        "created_at": "2025-10-15T22:49:44.755789Z"
+      },
+      {
+        "id": 11,
+        "first_name": "Speed",
+        "last_name": null,
+        "full_name": "Speed",
+        "email": "speed@test.com",
+        "phone_number": "123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-25",
+        "preferred_time": "10:00:00",
+        "notes": null,
+        "status": "pending",
+        "created_at": "2025-10-15T22:45:12.027704Z"
+      },
+      {
+        "id": 10,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "waverley",
+        "home_display_name": "Waverley",
+        "preferred_date": "2025-10-18",
+        "preferred_time": "11:00:00",
+        "notes": "test issue",
+        "status": "pending",
+        "created_at": "2025-10-15T22:41:20.186474Z"
+      },
+      {
+        "id": 9,
+        "first_name": "Final",
+        "last_name": null,
+        "full_name": "Final",
+        "email": "final@test.com",
+        "phone_number": "123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-25",
+        "preferred_time": "10:00:00",
+        "notes": null,
+        "status": "pending",
+        "created_at": "2025-10-15T22:39:50.690509Z"
+      },
+      {
+        "id": 8,
+        "first_name": "Email",
+        "last_name": "Test",
+        "full_name": "Email Test",
+        "email": "emailtest@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-25",
+        "preferred_time": "11:00:00",
+        "notes": "Testing email functionality",
+        "status": "pending",
+        "created_at": "2025-10-15T22:38:17.231592Z"
+      },
+      {
+        "id": 7,
+        "first_name": "Working",
+        "last_name": "Now",
+        "full_name": "Working Now",
+        "email": "working@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-20",
+        "preferred_time": "15:00:00",
+        "notes": "Should work now",
+        "status": "pending",
+        "created_at": "2025-10-15T22:33:11.473179Z"
+      },
+      {
+        "id": 6,
+        "first_name": "Fixed",
+        "last_name": "User",
+        "full_name": "Fixed User",
+        "email": "fixed@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-20",
+        "preferred_time": "14:00:00",
+        "notes": "Test after email fix",
+        "status": "pending",
+        "created_at": "2025-10-15T22:32:11.242887Z"
+      },
+      {
+        "id": 5,
+        "first_name": "A",
+        "last_name": null,
+        "full_name": "A",
+        "email": "a@b.com",
+        "phone_number": "123",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-20",
+        "preferred_time": "10:00:00",
+        "notes": null,
+        "status": "pending",
+        "created_at": "2025-10-15T22:29:56.393378Z"
+      },
+      {
+        "id": 4,
+        "first_name": "Working",
+        "last_name": "Test",
+        "full_name": "Working Test",
+        "email": "working@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-25",
+        "preferred_time": "15:00:00",
+        "notes": "Final test",
+        "status": "pending",
+        "created_at": "2025-10-15T22:25:24.855971Z"
+      },
+      {
+        "id": 3,
+        "first_name": "Test",
+        "last_name": "Fixed",
+        "full_name": "Test Fixed",
+        "email": "test@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-20",
+        "preferred_time": "14:00:00",
+        "notes": "Test after minimal fix",
+        "status": "pending",
+        "created_at": "2025-10-15T22:24:50.530024Z"
+      },
+      {
+        "id": 2,
+        "first_name": "Anwin",
+        "last_name": "Wilson",
+        "full_name": "Anwin Wilson",
+        "email": "anwinws@gmail.com",
+        "phone_number": "08281312628",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-12",
+        "preferred_time": "11:00:00",
+        "notes": "test",
+        "status": "pending",
+        "created_at": "2025-10-15T22:22:48.827059Z"
+      },
+      {
+        "id": 1,
+        "first_name": "Test",
+        "last_name": "User",
+        "full_name": "Test User",
+        "email": "test@example.com",
+        "phone_number": "1234567890",
+        "preferred_home": "cardiff",
+        "home_display_name": "Cardiff",
+        "preferred_date": "2025-11-15",
+        "preferred_time": "10:00:00",
+        "notes": "Test booking",
+        "status": "pending",
+        "created_at": "2025-10-15T22:22:17.789244Z"
+      }
+    ]
+  },
+  "available_slots": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "1.357s",
+    "data": {
+      "available_slots": [
+        "09:00",
+        "11:00",
+        "14:00",
+        "15:00",
+        "16:00"
+      ],
+      "date": "2025-10-19",
+      "home": "cardiff"
+    }
+  },
+  "booking_stats": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "1.103s",
+    "data": {
+      "total_bookings": 22,
+      "confirmed_bookings": 0,
+      "pending_bookings": 22,
+      "homes_stats": {
+        "Cardiff": 17,
+        "Barry": 0,
+        "Waverley": 5,
+        "College Fields": 0
+      }
+    }
+  },
+  "nearest_home": {
+    "success": true,
+    "status_code": 200,
+    "response_time": "2.148s",
+    "data": {
+      "nearest_home": "Bellavista Cardiff",
+      "address": "Cardiff, Wales, UK",
+      "phone": "029 2000 0000",
+      "distance": "0.0 miles",
+      "duration": "0 minutes",
+      "maps_url": "https://www.google.com/maps/dir/?api=1&origin=Cardiff,+Wales&destination=51.4816,-3.1791",
+      "coordinates": [
+        51.4816,
+        -3.1791
+      ]
+    }
+  },
+  "email_test": {
+    "success": true,
+    "status_code": 405,
+    "response_time": "1.841s",
+    "data": {
+      "detail": "Method \"POST\" not allowed."
+    }
+  }
+}

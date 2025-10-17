@@ -19,10 +19,10 @@ def send_booking_confirmation_email(booking):
         bool: True if sent successfully, False otherwise
     """
     
-    # Check if SendGrid is configured
+    # Check if SendGrid is configured - fail fast
     sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
     if not sendgrid_api_key:
-        print("SendGrid API key not configured")
+        print("SendGrid API key not configured - skipping email")
         return False
     
     try:

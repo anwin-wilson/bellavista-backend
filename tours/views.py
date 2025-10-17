@@ -51,14 +51,48 @@ class TourBookingCreateView(generics.CreateAPIView):
         if serializer.is_valid():
             booking = serializer.save()
             
-            # Send email via SendGrid (HTTP-based, works on Render)
-            email_sent = send_booking_confirmation_email(booking)
+            # Try to send email with timeout protection
+            email_sent = False
+            email_error = None
+            
+            try:
+                import threading
+                import time
+                
+                # Use threading for timeout protection
+                result = {'email_sent': False, 'error': None}
+                
+                def send_email_thread():
+                    try:
+                        result['email_sent'] = send_booking_confirmation_email(booking)
+                    except Exception as e:
+                        result['error'] = str(e)
+                
+                # Start email thread with 1 second timeout
+                email_thread = threading.Thread(target=send_email_thread)
+                email_thread.daemon = True
+                email_thread.start()
+                email_thread.join(timeout=1.0)
+                
+                if email_thread.is_alive():
+                    email_error = "Email timeout - continuing without email"
+                    print(f"Email timeout for booking {booking.id} - continuing")
+                else:
+                    email_sent = result['email_sent']
+                    if result['error']:
+                        email_error = result['error']
+                        print(f"Email error for booking {booking.id}: {result['error']}")
+                
+            except Exception as e:
+                email_error = f"Email system error: {str(e)}"
+                print(f"Email system error for booking {booking.id}: {e}")
             
             return Response({
                 'success': True,
                 'message': 'Tour booking submitted successfully!',
                 'booking_id': booking.id,
-                'email_sent': email_sent
+                'email_sent': email_sent,
+                'email_error': email_error if not email_sent else None
             }, status=status.HTTP_201_CREATED)
         
         return Response({
